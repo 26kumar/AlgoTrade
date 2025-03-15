@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Cpu, Globe, Users, Code, Shield, Zap } from 'lucide-react';
 
 const Home = () => {
@@ -34,6 +34,10 @@ const Home = () => {
       description: "Ultra-low latency execution and real-time data"
     }
   ];
+
+  useEffect(()=>{
+    window.scrollTo(0,0);
+  },[])
 
   return (
     <div className="bg-gray-900 py-20">

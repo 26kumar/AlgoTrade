@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Cpu, TrendingUp, Clock, DollarSign } from 'lucide-react';
 
 const strategies = [
@@ -45,6 +46,13 @@ const strategies = [
 ];
 
 const Strategies = () => {
+  const navigate = useNavigate();
+
+  const handleStrategyClick = (strategyName) => {
+    navigate(`/strategy/${strategyName.toLowerCase().replace(/\s+/g, '-')}`);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="bg-gray-900 py-16">
       <div className="container mx-auto px-6">
@@ -54,7 +62,11 @@ const Strategies = () => {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {strategies.map((strategy, index) => (
-            <div key={index} className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-all">
+            <button
+              key={index}
+              onClick={() => handleStrategyClick(strategy.name)}
+              className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-all text-left w-full"
+            >
               <div className="flex items-center mb-4">
                 {strategy.icon}
                 <h3 className="text-xl font-semibold text-white ml-3">{strategy.name}</h3>
@@ -85,7 +97,7 @@ const Strategies = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
