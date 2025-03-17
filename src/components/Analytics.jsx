@@ -3,7 +3,7 @@ import { BarChart2, PieChart, LineChart, Activity } from 'lucide-react';
 
 const Analytics = () => {
   return (
-    <div className="bg-gray-800 py-16">
+    <div id="analytics" className="bg-gray-800 py-16">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl font-bold text-white mb-12 text-center">
           Real-Time Analytics

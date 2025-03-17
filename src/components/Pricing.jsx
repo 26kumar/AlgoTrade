@@ -53,7 +53,7 @@ const Pricing = () => {
   ];
 
   return (
-    <div className="bg-gray-900 py-20">
+    <div id="pricing" className="bg-gray-900 py-20">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">Pricing Plans</h2>
@@ -110,18 +110,7 @@ const Pricing = () => {
           ))}
         </div>
 
-        {/* Custom Solution Section */}
-        <div className="mt-16 bg-gray-800 rounded-xl p-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Need a custom solution?</h3>
-            <p className="text-gray-400 mb-8">
-              Contact our sales team for a tailored package that meets your specific requirements
-            </p>
-            <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold">
-              Contact Sales
-            </button>
-          </div>
-        </div>
+        
 
       </div>
     </div>

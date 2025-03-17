@@ -54,7 +54,7 @@ const Strategies = () => {
   };
 
   return (
-    <div className="bg-gray-900 py-16">
+    <div id="strategies" className="bg-gray-900 py-16">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl font-bold text-white mb-12 text-center">
           Trading Strategies
