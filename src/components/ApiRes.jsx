@@ -20,10 +20,10 @@ const ApiRes = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const fileStatus = await axios.get("http://localhost:5000/api/check-file", {
+      const fileStatus = await axios.get("https://algotrade-node-server.onrender.com/api/check-file", {
         signal: controller.signal,
         validateStatus: (status) => status < 500,
-      });
+      });      
       setMessage(fileStatus.data.message || "File status checked successfully");
 
       const prediction = await axios.get("http://127.0.0.1:5001/api/predict", {
