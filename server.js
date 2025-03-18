@@ -67,6 +67,11 @@ const fetchStockData = async () => {
 // Fetch and save stock data on startup
 fetchStockData();
 
+app.get("/", (req, res) => {
+  res.send("<h2>🚀 Server is running! Try accessing <a href='/api/check-file'>/api/check-file</a></h2>");
+});
+
+
 // API to check if the file is saved
 app.get("/api/check-file", (req, res) => {
   const filePath = path.join("/tmp", "stock_data.csv");
