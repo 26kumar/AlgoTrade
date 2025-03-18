@@ -39,7 +39,7 @@ const ApiRes = () => {
       setMessage(fileStatus.data.message || "File status checked successfully");
 
       const prediction = await axios.get(
-        "https://algotrade-node-server.onrender.com/api/predict",
+        "https://algotrade-flask-server.onrender.com/api/predict",
         {
           signal: controller.signal,
           validateStatus: (status) => status < 500,
