@@ -10,13 +10,21 @@ const API_KEY = "1oe0pxJuzKk38F3fa8q0hkVjh9g8tbGl"; // Replace with your actual 
 const rest = restClient(API_KEY);
 
 // Enable CORS for frontend access
-app.use(
-  cors({
-    origin: ["https://project-mocha-delta-69.vercel.app/"], // Vercel frontend URL
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "*",  // Allows all origins
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+
+// app.use(
+//   cors({
+//     origin: ["https://project-mocha-delta-69.vercel.app/"], // Vercel frontend URL
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   })
+// );
 
 // Define stock symbol
 const STOCK_SYMBOL = "AAPL";

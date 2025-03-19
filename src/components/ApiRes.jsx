@@ -36,6 +36,7 @@ const ApiRes = () => {
           validateStatus: (status) => status < 500,
         }
       );
+      console.log(fileStatus.data.message);
       setMessage(fileStatus.data.message || "File status checked successfully");
 
       const prediction = await axios.get(
@@ -120,7 +121,7 @@ const ApiRes = () => {
         
         <img
         className="w-full max-w-3xl rounded-2xl mx-auto mt-2 mb-10 p-2 shadow-lg border border-gray-300"
-          src="https://project-mocha-delta-69.vercel.app/public/momentum_average_crossover.png"
+          src="/public/momentum_average_crossover.png"
           alt="Stock Prediction Chart"
         />
         <div className="grid md:grid-cols-4 gap-8 mb-16">
