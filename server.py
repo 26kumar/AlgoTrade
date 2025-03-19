@@ -1,14 +1,14 @@
 import os
 import matplotlib.pyplot as plt
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 import pandas as pd
 import joblib
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__, static_folder="public")  # ✅ Set static folder
-CORS(app)  # ✅ Enable CORS for frontend access
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # ✅ Fix CORS issue
 
 # ✅ Define global directory for storing generated assets
 GLOBAL_ASSETS_DIR = os.path.join(os.path.dirname(__file__), "public")
@@ -19,13 +19,13 @@ model_path = "models/1_model_meanAveragCrossover.pkl"
 model = joblib.load(model_path)
 
 
-# ✅ New route at "/"
 @app.route("/")
 def home():
     return "🚀 Welcome to Stock Prediction API! Go to /api/predict to make predictions."
 
 
 @app.route("/api/predict", methods=["GET"])
+@cross_origin()  # Apply CORS only to this route
 def predict():
     try:
         data_path = "data/stock_data.csv"
@@ -86,14 +86,20 @@ def predict():
         plt.close()
 
         print(f"✅ Image successfully saved at: {image_path}")
-        return jsonify({"message": signal, "image_url": "/public/momentum_average_crossover.png"})
+
+        # ✅ Fix CORS Image URL Issue
+        base_url = request.host_url.rstrip("/")  # Get base URL dynamically
+        return jsonify({
+            "message": signal,
+            "image_url": f"{base_url}/public/momentum_average_crossover.png"
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-# ✅ Route to serve the image
 @app.route("/api/get-image", methods=["GET"])
+@cross_origin()
 def get_image():
     image_name = "momentum_average_crossover.png"
     image_path = os.path.join(GLOBAL_ASSETS_DIR, image_name)
@@ -104,8 +110,8 @@ def get_image():
         return jsonify({"message": "❌ Image not found!"}), 404
 
 
-# ✅ Route to serve static files (for Vercel/Render)
 @app.route("/public/<path:filename>")
+@cross_origin()
 def serve_static(filename):
     return send_from_directory(GLOBAL_ASSETS_DIR, filename)
 
