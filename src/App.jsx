@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom"; // ✅ Use HashRouter
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import About from "./components/About";
@@ -13,7 +13,7 @@ import ApiRes from "./components/ApiRes";
 
 function App() {
   return (
-    <Router>
+    <HashRouter> {/* ✅ Use HashRouter directly */}
       <div className="min-h-screen bg-gray-900">
         <Navbar />
         <Routes>
@@ -35,7 +35,7 @@ function App() {
           <Route path="/strategy/:name" element={<ApiRes />} />
         </Routes>
       </div>
-    </Router>
+    </HashRouter>
   );
 }
 
