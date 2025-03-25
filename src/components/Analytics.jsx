@@ -1,9 +1,13 @@
 import React from 'react';
 import { BarChart2, PieChart, LineChart, Activity } from 'lucide-react';
 
-const Analytics = () => {
+const Analytics = React.forwardRef((props, ref) => {
   return (
-    <div className="bg-gray-800 py-16">
+    <section 
+      ref={ref}
+      id="analytics" 
+      className="bg-gray-800 py-16 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <h2 className="text-3xl font-bold text-white mb-12 text-center">
           Real-Time Analytics
@@ -52,8 +56,8 @@ const Analytics = () => {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Analytics;

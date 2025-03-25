@@ -1,9 +1,13 @@
 import React from 'react';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 
-const Contact = () => {
+const Contact = React.forwardRef((props, ref) => {
   return (
-    <div className="bg-gray-900 py-20">
+    <section 
+      ref={ref}
+      id="contact" 
+      className="bg-gray-900 py-20 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">Contact Us</h2>
@@ -65,45 +69,56 @@ const Contact = () => {
             <h3 className="text-2xl font-bold text-white mb-6">Send us a Message</h3>
             <form className="space-y-6">
               <div>
-                <label className="block text-gray-400 mb-2">Name</label>
+                <label htmlFor="name" className="block text-gray-400 mb-2">Name</label>
                 <input
+                  id="name"
                   type="text"
                   className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="Your name"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-2">Email</label>
+                <label htmlFor="email" className="block text-gray-400 mb-2">Email</label>
                 <input
+                  id="email"
                   type="email"
                   className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="your@email.com"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-2">Subject</label>
+                <label htmlFor="subject" className="block text-gray-400 mb-2">Subject</label>
                 <input
+                  id="subject"
                   type="text"
                   className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="How can we help?"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-2">Message</label>
+                <label htmlFor="message" className="block text-gray-400 mb-2">Message</label>
                 <textarea
+                  id="message"
                   className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 h-32"
                   placeholder="Your message..."
+                  required
                 ></textarea>
               </div>
-              <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-semibold">
+              <button 
+                type="submit" 
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-semibold transition-colors"
+              >
                 Send Message
               </button>
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Contact;

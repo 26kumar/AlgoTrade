@@ -1,7 +1,7 @@
 import React from 'react';
 import { BookOpen, Brain, BarChart as ChartBar, Download } from 'lucide-react';
 
-const Research = () => {
+const Research = React.forwardRef((props, ref) => {
   const reports = [
     {
       title: "Q1 2025 Market Analysis",
@@ -30,7 +30,11 @@ const Research = () => {
   ];
 
   return (
-    <div className="bg-gray-900 py-20">
+    <section 
+      ref={ref}
+      id="research" 
+      className="bg-gray-900 py-20 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">Research & Insights</h2>
@@ -128,8 +132,8 @@ const Research = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Research;

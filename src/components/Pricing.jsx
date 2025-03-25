@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
-const Pricing = () => {
+const Pricing = React.forwardRef((props, ref) => {
   const plans = [
     {
       name: "Starter",
@@ -53,7 +53,11 @@ const Pricing = () => {
   ];
 
   return (
-    <div className="bg-gray-900 py-20">
+    <section 
+      ref={ref}
+      id="pricing" 
+      className="bg-gray-900 py-20 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">Pricing Plans</h2>
@@ -103,29 +107,22 @@ const Pricing = () => {
                     ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
                     : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
+                onClick={() => {
+                  if (plan.price === "Custom") {
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    // Handle other button clicks (e.g., open signup modal)
+                  }
+                }}
               >
                 {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
               </button>
             </div>
           ))}
         </div>
-
-        {/* Custom Solution Section */}
-        <div className="mt-16 bg-gray-800 rounded-xl p-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Need a custom solution?</h3>
-            <p className="text-gray-400 mb-8">
-              Contact our sales team for a tailored package that meets your specific requirements
-            </p>
-            <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold">
-              Contact Sales
-            </button>
-          </div>
-        </div>
-
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Pricing;

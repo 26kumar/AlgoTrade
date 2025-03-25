@@ -1,7 +1,7 @@
 import React from 'react';
 import { Code, Database, Cpu, Zap } from 'lucide-react';
 
-const Products = () => {
+const Products = React.forwardRef((props, ref) => {
   const products = [
     {
       icon: <Code className="h-12 w-12 text-emerald-400" />,
@@ -50,7 +50,11 @@ const Products = () => {
   ];
 
   return (
-    <div className="bg-gray-900 py-20">
+    <section 
+      ref={ref}
+      id="products" 
+      className="bg-gray-900 py-20 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">Products & Services</h2>
@@ -98,7 +102,10 @@ const Products = () => {
                   Integration services
                 </li>
               </ul>
-              <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold">
+              <button 
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold"
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 Contact Sales
               </button>
             </div>
@@ -112,8 +119,8 @@ const Products = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Products;

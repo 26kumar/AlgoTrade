@@ -1,49 +1,49 @@
 import React from "react";
-import { Award, Target, Users, Briefcase, Type } from "lucide-react";
+import { Award, Target, Users, Briefcase } from "lucide-react";
 import praveer from "../assets/praveer.png";
 import trayambak from "../assets/trayambak.png";
 import rishabh from "../assets/rishabh.jpg";
 import rupesh from "../assets/rupesh.jpg";
 
-const About = () => {
+const About = React.forwardRef((props, ref) => {
   const team = [
     {
       name: "Rishabh Shrivastav",
-      role: "Machine Learning Lead",
+      role: "Machine Learning",
       image: rishabh,
-      description: "Former Quantitative Researcher at Goldman Sachs",
+      description: "Machine Learning Engineer",
     },
     {
       name: "Rupesh Kumar",
-      role: "Web Developer",
+      role: "Web Development",
       image: rupesh,
-      description: "15 years experience in high-frequency trading systems",
+      description: "Full Stack Developer",
     },
     {
-      name: "Praveer",
-      role: "Web Developer",
+      name: "Praveer Singh",
+      role: "Web Development",
       image: praveer,
-      description: "PhD in Financial Mathematics from MIT",
+      description: "Full Stack Developer",
     },
     {
       name: "Harshit Mehta",
       role: "Machine Learning",
       image:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
-      description: "Previously led product at Citadel Securities",
+      description: "Machine Learning Engineer",
     },
     {
       name: "Trayambak Rai",
       role: "Research & Development",
       image: trayambak,
-      description: "10+ years in software development, ex-Google",
+      description: "Research & Development",
     },
     {
       name: "Owais Raza",
       role: "Machine Learning",
       image:
         "https://images.unsplash.com/photo-1562788869-4ed32648eb72?auto=format&fit=crop&q=80&w=200",
-      description: "Former hedge fund strategist at Bridgewater Associates",
+      description: "Machine Learning Engineer",
     },
   ];
 
@@ -55,7 +55,11 @@ const About = () => {
   ];
 
   return (
-    <div className="bg-gray-900 py-20">
+    <section 
+      ref={ref} 
+      id="about" 
+      className="bg-gray-900 py-20 scroll-mt-16" // Added scroll-mt-16 to account for fixed navbar
+    >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">
@@ -111,8 +115,7 @@ const About = () => {
 
           {/* Second row (2 members centered) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4">
-            <div className="hidden md:block"></div>{" "}
-            {/* Empty space only on medium+ screens */}
+            <div className="hidden md:block"></div>
             {team.slice(4, 6).map((member, index) => (
               <div
                 key={index}
@@ -130,8 +133,7 @@ const About = () => {
                 <p className="text-gray-400 text-sm">{member.description}</p>
               </div>
             ))}
-            <div className="hidden md:block"></div>{" "}
-            {/* Empty space only on medium+ screens */}
+            <div className="hidden md:block"></div>
           </div>
         </div>
 
@@ -172,8 +174,8 @@ const About = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default About;

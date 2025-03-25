@@ -45,7 +45,7 @@ const strategies = [
   }
 ];
 
-const Strategies = () => {
+const Strategies = React.forwardRef((props, ref) => {
   const navigate = useNavigate();
 
   const handleStrategyClick = (strategyName) => {
@@ -54,7 +54,11 @@ const Strategies = () => {
   };
 
   return (
-    <div className="bg-gray-900 py-16">
+    <section 
+      ref={ref}
+      id="strategies" 
+      className="bg-gray-900 py-16 scroll-mt-16"
+    >
       <div className="container mx-auto px-6">
         <h2 className="text-3xl font-bold text-white mb-12 text-center">
           Trading Strategies
@@ -101,8 +105,8 @@ const Strategies = () => {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+});
 
 export default Strategies;
