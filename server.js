@@ -5,12 +5,26 @@ import path from "path";
 import cors from "cors"; // Import CORS
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const API_KEY = "1oe0pxJuzKk38F3fa8q0hkVjh9g8tbGl"; // Replace with your actual Polygon API key
 const rest = restClient(API_KEY);
 
 // Enable CORS for frontend access
-app.use(cors());
+app.use(cors({
+  origin: "*",  // Allows all origins
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+
+// app.use(
+//   cors({
+//     origin: ["https://project-mocha-delta-69.vercel.app/"], // Vercel frontend URL
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   })
+// );
 
 // Define stock symbol
 const STOCK_SYMBOL = "AAPL";
@@ -39,7 +53,7 @@ const fetchStockData = async () => {
     }
 
     const stockData = response.results;
-    const filePath = path.join(process.cwd(), "data", "stock_data.csv");
+    const filePath = path.join("/tmp", "stock_data.csv"); // Save in /tmp for Render
 
     // Create CSV Header (if file doesn't exist)
     if (!fs.existsSync(filePath)) {
@@ -61,9 +75,14 @@ const fetchStockData = async () => {
 // Fetch and save stock data on startup
 fetchStockData();
 
+app.get("/", (req, res) => {
+  res.send("<h2>🚀 Server is running! Try accessing <a href='/api/check-file'>/api/check-file</a></h2>");
+});
+
+
 // API to check if the file is saved
 app.get("/api/check-file", (req, res) => {
-  const filePath = path.join(process.cwd(), "data", "stock_data.csv");
+  const filePath = path.join("/tmp", "stock_data.csv");
 
   if (fs.existsSync(filePath)) {
     res.json({ message: "✅ Stock data retrieved" });
@@ -73,5 +92,5 @@ app.get("/api/check-file", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
