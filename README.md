@@ -1,6 +1,6 @@
 # AlgoTrade - Algorithmic Trading Platform
 
-![AlgoTrade]![Screenshot 2025-03-26 084703](https://github.com/user-attachments/assets/96dd7b48-9e9b-40af-af07-86d188d7b920)
+![AlgoTrade](https://github.com/user-attachments/assets/96dd7b48-9e9b-40af-af07-86d188d7b920)
 
 
 ## 📌 Overview
@@ -76,8 +76,8 @@ python app.py  # Start FastAPI server
 | POST   | `/api/place-order`      | Execute trade order   |
 
 ## 📊 Demo Screenshots
-![Dashboard]![Screenshot 2025-03-26 084719](https://github.com/user-attachments/assets/59d1b246-431b-426d-99e0-cdcd95431d54)
-![Trading View]![Trading View](https://github.com/user-attachments/assets/ff437ab3-43da-4c38-9414-2c3cd6732f20)
+![Dashboard](https://github.com/user-attachments/assets/59d1b246-431b-426d-99e0-cdcd95431d54)
+![Trading View](https://github.com/user-attachments/assets/ff437ab3-43da-4c38-9414-2c3cd6732f20)
 
 
 ## 📬 Contact
