@@ -46,34 +46,31 @@ AlgoTrade/
 git clone https://github.com/your-username/AlgoTrade.git
 cd AlgoTrade
 ```
-
 ### **2️⃣ Backend Setup**
 ```bash
-cd backend
 npm install  # Install dependencies
 node server.js  # Start the backend server
 ```
 
 ### **3️⃣ Frontend Setup**
 ```bash
-cd frontend
 npm install  # Install dependencies
 npm run dev  # Start React app
 ```
 
 ### **4️⃣ ML Model Setup**
 ```bash
-cd ml-models
 pip install -r requirements.txt  # Install Python dependencies
-python app.py  # Start FastAPI server
+python server.py  # Start FastAPI server
 ```
+
+## After cloning repo installing all dependencies open 3 terminal, run node server.js, python server.py and npm run dev in seperate terminals.
 
 ## 📌 API Endpoints
 | Method | Endpoint               | Description            |
 |--------|------------------------|------------------------|
 | GET    | `/api/market-data`      | Fetch live stock data |
 | POST   | `/api/predict`          | Predict stock trends  |
-| POST   | `/api/place-order`      | Execute trade order   |
 
 ## 📊 Demo Screenshots
 ![Dashboard](https://github.com/user-attachments/assets/59d1b246-431b-426d-99e0-cdcd95431d54)
