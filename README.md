@@ -33,11 +33,33 @@ AlgoTrade is an advanced algorithmic trading platform designed to assist traders
 ## 🏗️ Project Structure
 ```plaintext
 AlgoTrade/
-│── frontend/        # React & Tailwind-based UI
-│── backend/         # Express.js server & API integration
-│── ml-models/       # ML models (Random Forest, LSTM)
-│── database/        # MongoDB integration
-│── docs/            # Documentation files
+│── .bolt/               # Project-related metadata (if any)
+│── data/                # Data files related to stock market analysis
+│── dist/                # Build files for deployment
+│── models/              # Machine learning models (Random Forest, LSTM, etc.)
+│── node_modules/        # Dependencies installed via npm/yarn
+│── public/              # Static assets (images, icons, etc.)
+│── src/                 # Frontend source code
+│   │── assets/          # Images, logos, and static assets
+│   │── components/      # React components
+│   │── App.jsx          # Main React app component
+│   │── index.css        # Global styles
+│   │── main.jsx         # React entry point
+│   │── vite-env.d.ts    # TypeScript environment definitions
+│── .gitattributes       # Git file attribute settings
+│── .gitignore           # Git ignore file for unnecessary files
+│── eslint.config.js     # ESLint configuration for code quality
+│── index.html           # Main HTML file
+│── package-lock.json    # Lock file for installed dependencies
+│── package.json         # Project metadata and dependencies
+│── postcss.config.js    # PostCSS configuration for styling
+│── README.md            # Documentation file
+│── requirements.txt     # Python dependencies (for backend/ML)
+│── server.py            # Backend API using FastAPI/Flask
+│── tailwind.config.js   # Tailwind CSS configuration
+│── tsconfig.app.json    # TypeScript config for the application
+│── tsconfig.json        # TypeScript global configuration
+│── vite.config.js       # Vite configuration for React development
 ```
 
 ## 🖥️ Installation & Setup
@@ -46,16 +68,17 @@ AlgoTrade/
 git clone https://github.com/your-username/AlgoTrade.git
 cd AlgoTrade
 ```
-### **2️⃣ Backend Setup**
-```bash
-npm install  # Install dependencies
-node server.js  # Start the backend server
-```
 
 ### **3️⃣ Frontend Setup**
 ```bash
 npm install  # Install dependencies
 npm run dev  # Start React app
+```
+
+### **2️⃣ Backend Setup**
+```bash
+npm install express '@polygon.io/client-js'  # Install dependencies
+node server.js  # Start the backend server
 ```
 
 ### **4️⃣ ML Model Setup**
@@ -64,12 +87,12 @@ pip install -r requirements.txt  # Install Python dependencies
 python server.py  # Start FastAPI server
 ```
 
-## After cloning repo installing all dependencies open 3 terminal, run node server.js, python server.py and npm run dev in seperate terminals.
+## After cloning repo and installing all dependencies, open 3 terminal, run node server.js, python server.py and npm run dev in seperate terminals.
 
 ## 📌 API Endpoints
-| Method | Endpoint               | Description            |
-|--------|------------------------|------------------------|
-| GET    | `/api/market-data`      | Fetch live stock data |
+| Method | Endpoint                | Description           |
+|--------|-------------------------|-----------------------|
+| GET    | `/api/check-file`       | Fetch live stock data |
 | POST   | `/api/predict`          | Predict stock trends  |
 
 ## 📊 Demo Screenshots
@@ -79,7 +102,7 @@ python server.py  # Start FastAPI server
 
 ## 📬 Contact
 - 📧 Email: rupesh583k@gmail.com
-- 🐙 GitHub: [26_Kumar](https://github.com/26kumar)
+- 🐙 GitHub: [26kumar](https://github.com/26kumar)
 - 🔗 LinkedIn: [Rupesh Kumar](https://www.linkedin.com/in/rupesh-kumar-567198279)
 
 ---
