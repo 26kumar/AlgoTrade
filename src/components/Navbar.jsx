@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Menu, X, User, Bell, Settings } from 'lucide-react';
 import Auth from './Auth';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({ refs }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -32,6 +35,10 @@ const Navbar = ({ refs }) => {
     }
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
   return (
     <>
       <nav className="bg-gray-900 text-white px-6 py-4 fixed w-full top-0 z-50 flex justify-between items-center">
@@ -41,7 +48,7 @@ const Navbar = ({ refs }) => {
           </button>
           <h1 
             className="text-2xl font-bold text-emerald-400 cursor-pointer hover:text-emerald-300 transition-colors"
-            onClick={scrollToTop}
+            onClick={handleLogoClick}
           >
             AlgoTrade
           </h1>

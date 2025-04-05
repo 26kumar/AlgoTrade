@@ -9,7 +9,7 @@ const strategies = [
     description: "Capitalize on market trends and price momentum",
     parameters: ["RSI", "Moving Averages", "Volume", "Price Action"],
     bestFor: "Trending Markets",
-    winRate: "78%"
+    winRate: "80%"
   },
   {
     name: "Mean Reversion",
@@ -20,12 +20,12 @@ const strategies = [
     winRate: "82%"
   },
   {
-    name: "High-Frequency",
+    name: "Sentiment Analysis",
     icon: <Clock className="h-6 w-6 text-emerald-400" />,
-    description: "Ultra-fast execution for micro price movements",
+    description: "Leverage market mood and psychology for informed trading decisions",
     parameters: ["Tick Data", "Order Book Depth", "Latency", "Spread"],
-    bestFor: "All Market Conditions",
-    winRate: "65%"
+    bestFor: "Event-Driven & Trend-Following Strategy",
+    winRate: "75%"
   },
   {
     name: "Machine Learning",
