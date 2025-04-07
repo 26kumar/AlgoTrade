@@ -128,8 +128,8 @@ const ApiRes = () => {
           src={
             name === 'sentiment-analysis' || name === 'sentiment_analysis' ? Sentiment_image : 
             name === 'macd' ? macd_image : 
-            modelOverride === 'transformer' || name === 'time-series-transformer' ? momemtum_image :
-            transformer_image
+            modelOverride === 'transformer' || name === 'time-series-transformer' ? transformer_image : 
+            momemtum_image
           }
           alt={`${getDisplayName()} Model Output`}
         />
