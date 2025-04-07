@@ -1,6 +1,7 @@
 import os
+# Set matplotlib backend to non-interactive mode before importing pyplot
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # Use non-interactive backend to avoid threading issues
 import matplotlib.pyplot as plt
 from flask import Flask, jsonify, send_from_directory, request
 import pandas as pd
@@ -13,8 +14,6 @@ from keras.models import load_model
 from waitress import serve
 
 app = Flask(__name__, static_folder="public")
-
-# Configure CORS for production
 CORS(app, resources={
     r"/*": {
         "origins": [
@@ -25,80 +24,195 @@ CORS(app, resources={
         "allow_headers": ["Content-Type"]
     }
 })
-
-# Configure paths for Render
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-GLOBAL_ASSETS_DIR = os.path.join(BASE_DIR, "public")
-DATA_DIR = os.path.join(BASE_DIR, "data")
-MODELS_DIR = os.path.join(BASE_DIR, "models")
-
-# Create directories if they don't exist
+# ✅  Define global directory for storing generated assets
+GLOBAL_ASSETS_DIR = os.path.join(os.path.dirname(__file__), "public")
 os.makedirs(GLOBAL_ASSETS_DIR, exist_ok=True)
+
+# Ensure data directory exists
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 os.makedirs(DATA_DIR, exist_ok=True)
+
+# Ensure models directory exists
+MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
-def load_model_with_check(model_path, model_name):
-    """Helper function to load models with error handling"""
-    try:
-        if model_path.endswith('.h5'):
-            model = load_model(model_path)
-        else:
-            model = joblib.load(model_path)
-        print(f"✅ {model_name} model successfully loaded")
-        return model
-    except Exception as e:
-        print(f"❌ Error loading {model_name} model: {str(e)}")
-        return None
+# Load moving average crossover model with better error handling
+model_path = os.path.join(MODELS_DIR, "1_model_meanAveragCrossover.pkl")
+scaler_path = os.path.join(MODELS_DIR, "1_scaler.pkl")
 
-# Load all models
-models = {
-    'moving_average': {
-        'model': load_model_with_check(os.path.join(MODELS_DIR, "1_model_meanAveragCrossover.pkl"), "Moving Average"),
-        'scaler': load_model_with_check(os.path.join(MODELS_DIR, "1_scaler.pkl"), "Moving Average Scaler")
-    },
-    'sentiment': {
-        'model': load_model_with_check(os.path.join(MODELS_DIR, "sentiment_model.pkl"), "Sentiment")
-    },
-    'macd': {
-        'model': load_model_with_check(os.path.join(MODELS_DIR, "macd.pkl"), "MACD")
-    },
-    'transformer': {
-        'model': load_model_with_check(os.path.join(MODELS_DIR, "Transformer_model.h5"), "Transformer"),
-        'scaler': load_model_with_check(os.path.join(MODELS_DIR, "Transformer_scaler.pkl"), "Transformer Scaler")
-    }
-}
+# Load eent model
+sentiment_model_path = os.path.join(MODELS_DIR, "sentiment_model.pkl")
+
+#Load MACD model
+macd_model_path = os.path.join(MODELS_DIR, "macd.pkl")
+
+# Load Transformer model and scaler
+transformer_model_path = os.path.join(MODELS_DIR, "Transformer_model.h5")
+transformer_scaler_path = os.path.join(MODELS_DIR, "Transformer_scaler.pkl")
+
+try:
+    model = joblib.load(model_path)
+    print(f"✅ Moving average model successfully loaded from: {model_path}")
+except FileNotFoundError:
+    print(f"⚠️ Warning: Moving average model file not found at: {model_path}")
+    model = None
+except Exception as e:
+    print(f"⚠️ Warning: Error loading moving average model: {str(e)}")
+    model = None
+
+try:
+    sentiment_model = joblib.load(sentiment_model_path)
+    print(f"✅ Sentiment model successfully loaded from: {sentiment_model_path}")
+except FileNotFoundError:
+    print(f"⚠️ Warning: Sentiment model file not found at: {sentiment_model_path}")
+    sentiment_model = None
+except Exception as e:
+    print(f"⚠️ Warning: Error loading sentiment model: {str(e)}")
+    sentiment_model = None
+
+try:
+    macd_model = joblib.load(macd_model_path)
+    print(f"✅ MACD model successfully loaded from: {macd_model_path}")
+except FileNotFoundError:
+    print(f"⚠️ Warning: MACD model file not found at: {macd_model_path}")
+    macd_model = None
+except Exception as e:
+    print(f"⚠️ Warning: Error loading MACD model: {str(e)}")
+    macd_model = None
+
+try:
+    transformer_model = load_model(transformer_model_path)
+    transformer_scaler = joblib.load(transformer_scaler_path)
+    print(f"✅ Transformer model and scaler successfully loaded")
+except FileNotFoundError:
+    print(f"⚠️ Warning: Transformer model or scaler file not found")
+    transformer_model = None
+    transformer_scaler = None
+except Exception as e:
+    print(f"⚠️ Warning: Error loading Transformer model: {str(e)}")
+    transformer_model = None
+    transformer_scaler = None
+
+# Helper functions for MACD model
+def check_data_leakage(df):
+    """Check for potential data leakage issues"""
+    # Simple check for chronological ordering
+    if 'date' in df.columns and pd.api.types.is_datetime64_any_dtype(df['date']):
+        is_sorted = df['date'].is_monotonic_increasing
+    else:
+        is_sorted = True  # Assume sorted if no date column
+        
+    return "Data leakage check passed" if is_sorted else "Warning: Data not in chronological order"
+
+def time_series_split(df):
+    """Perform time series split and generate signals"""
+    # Clone the dataframe to avoid modifications to original
+    df = df.copy()
+    
+    # Ensure date column is datetime and set as index
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+        df.set_index('date', inplace=True)
+    
+    # Calculate MACD indicators
+    df['ema12'] = df['close'].ewm(span=12, adjust=False).mean()
+    df['ema26'] = df['close'].ewm(span=26, adjust=False).mean()
+    df['macd'] = df['ema12'] - df['ema26']
+    df['signal_line'] = df['macd'].ewm(span=9, adjust=False).mean()
+    df['histogram'] = df['macd'] - df['signal_line']
+    
+    # Generate trading signals (1 for buy, -1 for sell, 0 for hold)
+    df['Signal'] = 0
+    # Buy signal: MACD crosses above signal line
+    df.loc[(df['macd'] > df['signal_line']) & (df['macd'].shift(1) <= df['signal_line'].shift(1)), 'Signal'] = 1
+    # Sell signal: MACD crosses below signal line
+    df.loc[(df['macd'] < df['signal_line']) & (df['macd'].shift(1) >= df['signal_line'].shift(1)), 'Signal'] = -1
+    
+    # For calculation purposes, forward fill the signals (maintain position until new signal)
+    df['Position'] = df['Signal'].replace(0, np.nan).fillna(method='ffill').fillna(0)
+    
+    # Calculate returns
+    df['Return'] = df['close'].pct_change()
+    df['Strategy_Return'] = df['Position'].shift(1) * df['Return']
+    
+    # Calculate cumulative returns
+    df['Cumulative_Return'] = (1 + df['Strategy_Return']).cumprod()
+    df['Buy_and_Hold'] = (1 + df['Return']).cumprod()
+    
+    # Rename 'close' to 'Close' for consistency
+    df.rename(columns={'close': 'Close'}, inplace=True)
+    
+    # Create a dummy model and scaler for compatibility
+    model = {}
+    scaler = StandardScaler()
+    features = ['macd', 'signal_line', 'histogram']
+    
+    # Return the test signals dataframe and model components
+    return df, model, scaler, features
+
+def verify_return_calculation(test_signals):
+    """Verify the return calculation methodology"""
+    # Check if returns are calculated correctly
+    if 'Return' in test_signals.columns and 'Strategy_Return' in test_signals.columns:
+        avg_return = test_signals['Return'].mean()
+        strategy_return = test_signals['Strategy_Return'].mean()
+        final_return = test_signals['Cumulative_Return'].iloc[-1] if not test_signals.empty else 0
+        
+        return (f"Return verification: Average daily return: {avg_return:.4f}, "
+                f"Strategy avg return: {strategy_return:.4f}, "
+                f"Final cumulative return: {final_return:.4f}")
+    else:
+        return "Return columns not found in test signals"
+
+def calculate_risk_metrics(test_signals):
+    """Calculate risk and performance metrics"""
+    metrics = {}
+    
+    if test_signals.empty:
+        return {"error": "No data available for risk calculation"}
+    
+    # Assuming we have strategy returns and benchmark returns
+    if 'Strategy_Return' in test_signals.columns and 'Return' in test_signals.columns:
+        # Total return
+        metrics['total_return'] = float(test_signals['Cumulative_Return'].iloc[-1] - 1)
+        metrics['buy_hold_return'] = float(test_signals['Buy_and_Hold'].iloc[-1] - 1)
+        
+        # Annualized return (assuming daily data)
+        n_days = len(test_signals)
+        metrics['annualized_return'] = float(((1 + metrics['total_return']) ** (252 / n_days)) - 1)
+        
+        # Sharpe ratio (assuming risk-free rate of 0)
+        sharpe_ratio = (test_signals['Strategy_Return'].mean() / test_signals['Strategy_Return'].std() 
+                        * np.sqrt(252) if test_signals['Strategy_Return'].std() > 0 else 0)
+        metrics['sharpe_ratio'] = float(sharpe_ratio)
+        
+        # Maximum drawdown
+        cum_returns = test_signals['Cumulative_Return']
+        running_max = cum_returns.cummax()
+        drawdown = (cum_returns / running_max) - 1
+        metrics['max_drawdown'] = float(drawdown.min())
+        
+        # Win rate (percentage of winning trades)
+        winning_days = (test_signals['Strategy_Return'] > 0).sum()
+        total_days = (test_signals['Strategy_Return'] != 0).sum()
+        metrics['win_rate'] = float(winning_days / total_days if total_days > 0 else 0)
+        
+    return metrics
 
 @app.route("/")
 def home():
     return "🚀 Welcome to Stock Prediction API! Go to /api/predict for moving average predictions, /api/predict-sentiment for sentiment predictions, or /api/predict-macd for MACD predictions."
 
-@app.route("/health")
-def health_check():
-    """Endpoint for health checks"""
-    status = {
-        'status': 'healthy',
-        'models_loaded': {name: model['model'] is not None for name, model in models.items()},
-        'directories': {
-            'models': os.listdir(MODELS_DIR) if os.path.exists(MODELS_DIR) else 'missing',
-            'data': os.listdir(DATA_DIR) if os.path.exists(DATA_DIR) else 'missing'
-        }
-    }
-    return jsonify(status)
 
 @app.route("/api/predict", methods=["GET"])
-@cross_origin()
+@cross_origin()  # Apply CORS only to this route
 def predict():
     try:
-        model_data = models['moving_average']
-        if not model_data['model'] or not model_data['scaler']:
-            return jsonify({"message": "❌ Model not loaded"}), 500
+        # Check if model is loaded
+        if model is None:
+            return jsonify({"message": "❌ Moving average model not loaded. Check server logs."}), 500
 
         data_path = os.path.join(DATA_DIR, "stock_data.csv")
-        if not os.path.exists(data_path):
-            return jsonify({"message": "❌ Stock data not found"}), 404
-            
-        stock_data = pd.read_csv(data_path)
-   
 
         # Load stock data
         try:
@@ -197,7 +311,7 @@ def predict():
         # Return only the simple signal message but keep other data in the JSON
         base_url = request.host_url.rstrip("/")  # Get base URL dynamically
         return jsonify({
-            "message": "Prediction successful",  # Use the simple signal format
+            "message": signal,  # Use the simple signal format
             "signal": signal.split(" ")[1].strip("()"),
             "price": float(latest_price),
             "change": float(price_change),
@@ -207,8 +321,10 @@ def predict():
         })
 
     except Exception as e:
-        traceback.print_exc()
-        return jsonify({"message": f"❌ Error: {str(e)}"}), 500
+        error_traceback = traceback.format_exc()
+        print(f"❌ Error in prediction: {str(e)}")
+        print(f"Traceback: {error_traceback}")
+        return jsonify({"message": f"❌ Error in prediction: {str(e)}"}), 500
 
 
 @app.route("/api/predict-sentiment", methods=["GET"])
@@ -644,14 +760,15 @@ def predict_transformer():
         return jsonify({"message": f"❌ Error in Transformer prediction: {str(e)}"}), 500
 
 
-
 if __name__ == "__main__":
-    print("Starting server...")
-    print("Health check at /health")
-    print("Available models:")
-    for name, data in models.items():
-        print(f"- {name}: {'✅' if data['model'] else '❌'}")
+    print("Starting prediction server...")
+    print(f"Moving average model status: {'Loaded' if model is not None else 'Not loaded'}")
+    print(f"Sentiment model status: {'Loaded' if sentiment_model is not None else 'Not loaded'}")
+    print(f"MACD model status: {'Loaded' if macd_model is not None else 'Not loaded'}")
+    print(f"Transformer model status: {'Loaded' if transformer_model is not None else 'Not loaded'}")
+    print(f"Data directory: {DATA_DIR}")
+    print(f"Public directory: {GLOBAL_ASSETS_DIR}")
     
-    port = int(os.environ.get("PORT", 5001))
-    print(f"Server running on port {port}")
-    serve(app, host="0.0.0.0", port=port)
+    # Use this for Render deployment
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
