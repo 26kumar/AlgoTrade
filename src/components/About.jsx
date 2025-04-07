@@ -22,13 +22,13 @@ const About = React.forwardRef((props, ref) => {
       description: "Full Stack Developer",
     },
     {
-      name: "Praveer Singh",
+      name: "Praveer",
       role: "Web Development",
       image: praveer,
       description: "Full Stack Developer",
     },
     {
-      name: "Harshit Mehta",
+      name: "Harshit",
       role: "Machine Learning",
       image: Harshit,
       description: "Machine Learning Engineer",
