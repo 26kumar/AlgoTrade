@@ -759,4 +759,4 @@ if __name__ == "__main__":
     print(f"Transformer model status: {'Loaded' if transformer_model is not None else 'Not loaded'}")
     print(f"Data directory: {DATA_DIR}")
     print(f"Public directory: {GLOBAL_ASSETS_DIR}")
-    app.run(host="0.0.0.0", port=5001, debug=True, threaded=True)
+    app.run(host="https://algotrade-flask-server.onrender.com", port=5001, debug=True, threaded=True)

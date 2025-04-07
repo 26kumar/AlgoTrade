@@ -35,21 +35,21 @@ const ApiRes = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const fileStatus = await axios.get("http://localhost:5000/api/check-file", {
+      const fileStatus = await axios.get("https://algotrade-node-server.onrender.com/api/check-file", {
         signal: controller.signal,
         validateStatus: (status) => status < 500,
       });
       setMessage(fileStatus.data.message || "File status checked successfully");
 
       // Choose the appropriate prediction endpoint based on the strategy
-      let predictionEndpoint = "http://127.0.0.1:5001/api/predict";
+      let predictionEndpoint = "https://algotrade-flask-server.onrender.com/api/predict";
       
       if (name === 'sentiment-analysis' || name === 'sentiment_analysis') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-sentiment";
+        predictionEndpoint = "https://algotrade-flask-server.onrender.com/api/predict-sentiment";
       } else if (name === 'macd') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-macd";
+        predictionEndpoint = "https://algotrade-flask-server.onrender.com/api/predict-macd";
       } else if (modelOverride === 'transformer' || name === 'time-series-transformer') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-transformer";
+        predictionEndpoint = "https://algotrade-flask-server.onrender.com/api/predict-transformer";
       }
 
       const prediction = await axios.get(predictionEndpoint, {

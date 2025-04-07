@@ -200,14 +200,14 @@ const TradingInterface = ({ strategy }) => {
     
     try {
       // First check if data file exists
-      const fileCheckResponse = await axios.get("http://localhost:5000/api/check-file", {
+      const fileCheckResponse = await axios.get("https://algotrade-node-server.onrender.com/api/check-file", {
         validateStatus: (status) => status < 500,
       });
       
       // If file doesn't exist, trigger data fetch
       if (!fileCheckResponse.data.exists) {
         console.log("Stock data file not found. Fetching fresh data...");
-        await axios.get("http://localhost:5000/api/fetch-data", {
+        await axios.get("https://algotrade-node-server.onrender.com/api/fetch-data", {
           validateStatus: (status) => status < 500,
         });
       }
@@ -216,20 +216,20 @@ const TradingInterface = ({ strategy }) => {
       let endpoint;
       switch(currentModel) {
         case 'sentiment':
-          endpoint = "http://localhost:5001/api/predict-sentiment";
+          endpoint = "https://algotrade-flask-server.onrender.com/api/predict-sentiment";
           break;
         case 'momentum':
-          endpoint = "http://localhost:5001/api/predict-momentum";
+          endpoint = "https://algotrade-flask-server.onrender.com/api/predict-momentum";
           break;
         case 'macd':
-          endpoint = "http://localhost:5001/api/predict-macd";
+          endpoint = "https://algotrade-flask-server.onrender.com/api/predict-macd";
           break;
         case 'transformer':
-          endpoint = "http://localhost:5001/api/predict-transformer";
+          endpoint = "https://algotrade-flask-server.onrender.com/api/predict-transformer";
           break;
         case 'moving_average':
         default:
-          endpoint = "http://localhost:5001/api/predict";
+          endpoint = "https://algotrade-flask-server.onrender.com/api/predict";
           break;
       }
       

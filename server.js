@@ -5,7 +5,7 @@ import path from "path";
 import cors from "cors"; // Import CORS
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = `https://algotrade-node-server.onrender.com` || 5000;
 const API_KEY = "1oe0pxJuzKk38F3fa8q0hkVjh9g8tbGl"; // Replace with your actual Polygon API key
 const rest = restClient(API_KEY);
 
