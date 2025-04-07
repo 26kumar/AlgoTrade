@@ -3,6 +3,13 @@ import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FileCheck, TrendingUp, AlertCircle, RefreshCw, Activity, BarChart2, Clock, Shield } from "lucide-react";
 import TradingInterface from "./TradingInterface";
+import Sentiment_image from "../assets/Sentiment_image.jpg"
+import macd_image from "../assets/macd_image.png"
+
+// Update these URLs
+const NODE_SERVER = "https://algotrade-node-server.onrender.com";
+const FLASK_SERVER = "https://algotrade-flask-server.onrender.com";
+
 
 const ApiRes = () => {
   const { name } = useParams();
@@ -31,38 +38,27 @@ const ApiRes = () => {
     setError(null);
 
     try {
-      const timeout = 5000;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      const fileStatus = await axios.get("http://localhost:5000/api/check-file", {
-        signal: controller.signal,
-        validateStatus: (status) => status < 500,
-      });
+      const fileStatus = await axios.get(`${NODE_SERVER}/api/check-file`);
       setMessage(fileStatus.data.message || "File status checked successfully");
 
-      // Choose the appropriate prediction endpoint based on the strategy
-      let predictionEndpoint = "http://127.0.0.1:5001/api/predict";
+      // Choose the appropriate prediction endpoint
+      let predictionEndpoint = `${FLASK_SERVER}/api/predict`;
       
       if (name === 'sentiment-analysis' || name === 'sentiment_analysis') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-sentiment";
+        predictionEndpoint = `${FLASK_SERVER}/api/predict-sentiment`;
       } else if (name === 'macd') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-macd";
+        predictionEndpoint = `${FLASK_SERVER}/api/predict-macd`;
       } else if (modelOverride === 'transformer' || name === 'time-series-transformer') {
-        predictionEndpoint = "http://127.0.0.1:5001/api/predict-transformer";
+        predictionEndpoint = `${FLASK_SERVER}/api/predict-transformer`;
       }
 
-      const prediction = await axios.get(predictionEndpoint, {
-        signal: controller.signal,
-        validateStatus: (status) => status < 500,
-      });
+      const prediction = await axios.get(predictionEndpoint);
       setStockPrediction(prediction.data.message || "Prediction data received");
 
-      clearTimeout(timeoutId);
     } catch (error) {
       console.error("API Fetch Error:", error);
       if (error.code === "ERR_NETWORK") {
-        setError("Unable to connect to the trading servers. Please ensure the backend services are running.");
+        setError("Unable to connect to the trading servers. Please try again later.");
       } else if (error.code === "ECONNABORTED") {
         setError("Connection timed out. Please try again.");
       } else {
@@ -128,8 +124,8 @@ const ApiRes = () => {
         <img
           className="w-full max-w-3xl rounded-2xl mx-auto mt-2 mb-10 p-2 shadow-lg border border-gray-300"
           src={
-            name === 'sentiment-analysis' || name === 'sentiment_analysis' ? "/public/sentiment_analysis.png" : 
-            name === 'macd' ? "/public/macd_analysis.png" : 
+            name === 'sentiment-analysis' || name === 'sentiment_analysis' ? Sentiment_image : 
+            name === 'macd' ? macd_image : 
             modelOverride === 'transformer' || name === 'time-series-transformer' ? "/public/transformer_analysis.png" :
             "/public/momentum_average_crossover.png"
           }

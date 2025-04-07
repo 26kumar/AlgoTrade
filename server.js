@@ -2,11 +2,11 @@ import express from "express";
 import { restClient } from "@polygon.io/client-js";
 import fs from "fs";
 import path from "path";
-import cors from "cors"; // Import CORS
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const API_KEY = "1oe0pxJuzKk38F3fa8q0hkVjh9g8tbGl"; // Replace with your actual Polygon API key
+const API_KEY = "1oe0pxJuzKk38F3fa8q0hkVjh9g8tbGl";
 const rest = restClient(API_KEY);
 
 // Create data directory if it doesn't exist
@@ -18,12 +18,13 @@ if (!fs.existsSync(DATA_DIR)) {
 
 // Enable CORS for frontend access
 app.use(cors({
-  origin: "*",  // Allows all origins
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  origin: [
+    "https://project-mocha-delta-69.vercel.app",
+    "https://algotrade-flask-server.onrender.com"
+  ],
+  methods: ["GET", "POST"],
   credentials: true
 }));
-
 // app.use(
 //   cors({
 //     origin: ["https://project-mocha-delta-69.vercel.app/"], // Vercel frontend URL
@@ -153,7 +154,5 @@ app.get("/api/check-file", (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Stock Data Server running on port ${PORT}`);
   console.log(`📁 Data Directory: ${DATA_DIR}`);
-  
-  // Fetch stock data on startup
   fetchStockData();
 });

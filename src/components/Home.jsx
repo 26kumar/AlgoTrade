@@ -74,7 +74,7 @@ const Home = ({ forwardedRef }) => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-all"
+                className="bg-gray-800 p-8 rounded-xl "
               >
                 <div className="mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold text-white mb-2">

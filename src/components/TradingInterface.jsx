@@ -3,6 +3,10 @@ import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, Target, Clock, Set
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
+const NODE_SERVER = "https://algotrade-node-server.onrender.com";
+const FLASK_SERVER = "https://algotrade-flask-server.onrender.com";
+
+
 const TradingInterface = ({ strategy }) => {
   // Trading settings state
   const [isAutoTrading, setIsAutoTrading] = useState(false);
@@ -199,46 +203,32 @@ const TradingInterface = ({ strategy }) => {
     }
     
     try {
-      // First check if data file exists
-      const fileCheckResponse = await axios.get("http://localhost:5000/api/check-file", {
-        validateStatus: (status) => status < 500,
-      });
+      const fileCheckResponse = await axios.get(`${NODE_SERVER}/api/check-file`);
       
-      // If file doesn't exist, trigger data fetch
       if (!fileCheckResponse.data.exists) {
         console.log("Stock data file not found. Fetching fresh data...");
-        await axios.get("http://localhost:5000/api/fetch-data", {
-          validateStatus: (status) => status < 500,
-        });
+        await axios.get(`${NODE_SERVER}/api/fetch-data`);
       }
       
-      // Fetch prediction based on strategy/model
       let endpoint;
       switch(currentModel) {
         case 'sentiment':
-          endpoint = "http://localhost:5001/api/predict-sentiment";
-          break;
-        case 'momentum':
-          endpoint = "http://localhost:5001/api/predict-momentum";
+          endpoint = `${FLASK_SERVER}/api/predict-sentiment`;
           break;
         case 'macd':
-          endpoint = "http://localhost:5001/api/predict-macd";
+          endpoint = `${FLASK_SERVER}/api/predict-macd`;
           break;
         case 'transformer':
-          endpoint = "http://localhost:5001/api/predict-transformer";
+          endpoint = `${FLASK_SERVER}/api/predict-transformer`;
           break;
         case 'moving_average':
         default:
-          endpoint = "http://localhost:5001/api/predict";
+          endpoint = `${FLASK_SERVER}/api/predict`;
           break;
       }
       
-      const response = await axios.get(endpoint, {
-        validateStatus: (status) => status < 500,
-      });
-      
+      const response = await axios.get(endpoint);
       const signal = response.data.message;
-      console.log(`Received ${getModelDisplayName()} prediction signal:`, signal);
       
       if (currentModel === 'moving_average' || currentModel === 'momentum' || currentModel === 'macd' || currentModel === 'transformer') {
         setMarketPrediction(signal);

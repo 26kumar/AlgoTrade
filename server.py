@@ -11,13 +11,22 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from flask_cors import CORS, cross_origin
 import traceback
 from keras.models import load_model
+from waitress import serve
 
-app = Flask(__name__, static_folder="public")  # ✅ Set static folder
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # ✅ Fix CORS issue
-
-# ✅ Define global directory for storing generated assets
+app = Flask(__name__, static_folder="public")
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://project-mocha-delta-69.vercel.app",
+            "https://algotrade-node-server.onrender.com"
+        ],
+        "methods": ["GET", "POST"],
+        "allow_headers": ["Content-Type"]
+    }
+})
+# ✅  Define global directory for storing generated assets
 GLOBAL_ASSETS_DIR = os.path.join(os.path.dirname(__file__), "public")
-os.makedirs(GLOBAL_ASSETS_DIR, exist_ok=True)  # Ensure directory exists
+os.makedirs(GLOBAL_ASSETS_DIR, exist_ok=True)
 
 # Ensure data directory exists
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -31,7 +40,7 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 model_path = os.path.join(MODELS_DIR, "1_model_meanAveragCrossover.pkl")
 scaler_path = os.path.join(MODELS_DIR, "1_scaler.pkl")
 
-# Load sentiment model
+# Load eent model
 sentiment_model_path = os.path.join(MODELS_DIR, "sentiment_model.pkl")
 
 #Load MACD model
@@ -752,11 +761,13 @@ def predict_transformer():
 
 
 if __name__ == "__main__":
-    print("Starting prediction server on port 5001...")
+    print("Starting prediction server...")
     print(f"Moving average model status: {'Loaded' if model is not None else 'Not loaded'}")
     print(f"Sentiment model status: {'Loaded' if sentiment_model is not None else 'Not loaded'}")
     print(f"MACD model status: {'Loaded' if macd_model is not None else 'Not loaded'}")
     print(f"Transformer model status: {'Loaded' if transformer_model is not None else 'Not loaded'}")
     print(f"Data directory: {DATA_DIR}")
     print(f"Public directory: {GLOBAL_ASSETS_DIR}")
-    app.run(host="0.0.0.0", port=5001, debug=True, threaded=True)
+    
+    # Use waitress for production
+    serve(app, host="0.0.0.0", port=5001)

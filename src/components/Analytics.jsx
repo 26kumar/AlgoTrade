@@ -13,37 +13,12 @@ const Analytics = React.forwardRef((props, ref) => {
           Real-Time Analytics
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-gray-900 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Strategy Performance</h3>
-              <Activity className="h-5 w-5 text-emerald-400" />
-            </div>
-            <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-              <img 
-              className='h-full w-full'
-              src="https://storage.googleapis.com/profit-prod/wp-content/uploads/2022/10/3725171a-performance-management.jpg" alt="" />
-            </div>
-          </div>
-
-          <div className="bg-gray-900 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Profit Distribution</h3>
-              <PieChart className="h-5 w-5 text-emerald-400" />
-            </div>
-            <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-              <img 
-              className='h-full w-full'
-              src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWNiZGgzNHJoeDZrYjkyNHJ3bWNtOTN3eDhmNDhhemN6aXVkd3VudSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7HxmWe4T0iNYojD0OD/giphy.gif" alt="" />
-            </div>
-          </div>
-        </div>
 
         <div className="grid md:grid-cols-4 gap-6 mt-8">
           {[
-            { label: "Total Profit", value: "$24,521", change: "+12.5%" },
-            { label: "Win Rate", value: "78.5%", change: "+2.3%" },
-            { label: "Active Trades", value: "12", change: "−3" },
+            { label: "Total Profit", value: "₹5K", change: "+12.5%" },
+            { label: "Win Rate", value: "85.5%", change: "+2.3%" },
+            { label: "Active Trades", value: "10", change: "+3" },
             { label: "Avg. Return", value: "8.2%", change: "+1.1%" }
           ].map((stat, index) => (
             <div key={index} className="bg-gray-900 p-6 rounded-xl">
