@@ -1,9 +1,11 @@
 import React from "react";
 import { Award, Target, Users, Briefcase } from "lucide-react";
 import praveer from "../assets/praveer.png";
-import trayambak from "../assets/trayambak.png";
+import trayambak from "../assets/trayambak.jpg";
 import rishabh from "../assets/rishabh.jpg";
 import rupesh from "../assets/rupesh.jpg";
+import Harshit from "../assets/Harshit.jpg";
+import owais from "../assets/owais.jpg";
 
 const About = React.forwardRef((props, ref) => {
   const team = [
@@ -28,8 +30,7 @@ const About = React.forwardRef((props, ref) => {
     {
       name: "Harshit Mehta",
       role: "Machine Learning",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      image: Harshit,
       description: "Machine Learning Engineer",
     },
     {
@@ -41,17 +42,16 @@ const About = React.forwardRef((props, ref) => {
     {
       name: "Owais Raza",
       role: "Machine Learning",
-      image:
-        "https://images.unsplash.com/photo-1562788869-4ed32648eb72?auto=format&fit=crop&q=80&w=200",
+      image: owais,
       description: "Machine Learning Engineer",
     },
   ];
 
   const stats = [
-    { icon: <Award />, value: "10+", label: "Years Experience" },
-    { icon: <Target />, value: "99.9%", label: "Uptime" },
-    { icon: <Users />, value: "50,000+", label: "Active Traders" },
-    { icon: <Briefcase />, value: "$2B+", label: "Monthly Volume" },
+    { icon: <Award />, value: "18+", label: "Months Experience" },
+    { icon: <Target />, value: "95.9%", label: "Uptime" },
+    { icon: <Users />, value: "50+", label: "Active Traders" },
+    { icon: <Briefcase />, value: "₹10K+", label: "Monthly Volume" },
   ];
 
   return (
@@ -89,7 +89,7 @@ const About = React.forwardRef((props, ref) => {
         {/* Leadership Team Section */}
         <div className="mb-20">
           <h3 className="text-3xl font-bold text-white mb-12 text-center">
-            Our Leadership Team
+            Our Team
           </h3>
 
           {/* First row (4 members) */}

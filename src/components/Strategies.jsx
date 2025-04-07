@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LineChart, Cpu, TrendingUp, Clock, DollarSign } from 'lucide-react';
+import { LineChart, Cpu, TrendingUp, Clock, DollarSign, GitBranch } from 'lucide-react';
 
 const strategies = [
   {
@@ -12,7 +12,7 @@ const strategies = [
     winRate: "80%"
   },
   {
-    name: "Mean Reversion",
+    name: "MACD",
     icon: <LineChart className="h-6 w-6 text-emerald-400" />,
     description: "Profit from price corrections and market equilibrium",
     parameters: ["Bollinger Bands", "Standard Deviation", "Historical Volatility"],
@@ -27,29 +27,28 @@ const strategies = [
     bestFor: "Event-Driven & Trend-Following Strategy",
     winRate: "75%"
   },
+
   {
-    name: "Machine Learning",
-    icon: <Cpu className="h-6 w-6 text-emerald-400" />,
-    description: "AI-powered pattern recognition and prediction",
-    parameters: ["Historical Data", "Market Indicators", "Sentiment Analysis"],
-    bestFor: "Complex Market Patterns",
-    winRate: "75%"
-  },
-  {
-    name: "Statistical Arbitrage",
-    icon: <DollarSign className="h-6 w-6 text-emerald-400" />,
-    description: "Exploit price differences across markets",
-    parameters: ["Correlation", "Price Disparity", "Trading Pairs"],
-    bestFor: "Multiple Markets",
-    winRate: "85%"
+    name: "Time Series Windowing",
+    icon: <GitBranch className="h-6 w-6 text-emerald-400" />,
+    description: "Deep learning-based time series prediction using Transformer model",
+    parameters: ["Sequence Windowing", "Self-Attention", "Neural Networks", "Historical Data"],
+    bestFor: "Complex Time Series Data",
+    winRate: "85%",
+    model: "transformer"
   }
 ];
 
 const Strategies = React.forwardRef((props, ref) => {
   const navigate = useNavigate();
 
-  const handleStrategyClick = (strategyName) => {
-    navigate(`/strategy/${strategyName.toLowerCase().replace(/\s+/g, '-')}`);
+  const handleStrategyClick = (strategyName, modelOverride) => {
+    // If there's a specific model to use, append it to the URL
+    const urlPath = modelOverride 
+      ? `/${strategyName.toLowerCase().replace(/\s+/g, '-')}?model=${modelOverride}`
+      : `/${strategyName.toLowerCase().replace(/\s+/g, '-')}`;
+      
+    navigate(`/strategy${urlPath}`);
     window.scrollTo(0, 0);
   };
 
@@ -64,11 +63,11 @@ const Strategies = React.forwardRef((props, ref) => {
           Trading Strategies
         </h2>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
           {strategies.map((strategy, index) => (
             <button
               key={index}
-              onClick={() => handleStrategyClick(strategy.name)}
+              onClick={() => handleStrategyClick(strategy.name, strategy.model)}
               className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-all text-left w-full"
             >
               <div className="flex items-center mb-4">

@@ -25,14 +25,75 @@ const TradingInterface = ({ strategy }) => {
   });
   const [marketPrice, setMarketPrice] = useState(100.25);
   const [marketPrediction, setMarketPrediction] = useState(null);
+  
+  // New states for sentiment model
+  const [sentimentPrediction, setSentimentPrediction] = useState(null);
+  // Use strategy prop to determine model instead of user selection
+  const [isLoadingSentiment, setIsLoadingSentiment] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto trading state
   const [tradeCount, setTradeCount] = useState(0);
   const [lastSignal, setLastSignal] = useState(null);
   const [autoTradeInterval, setAutoTradeInterval] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [tradeHistory, setTradeHistory] = useState([]);
+
+  // Format strategy name for display
+  const formatStrategyName = useCallback((strategyName) => {
+    if (strategyName === 'sentiment_analysis' || strategyName === 'sentiment-analysis') {
+      return 'Sentiment Analysis';
+    } else if (strategyName === 'momentum_trading' || strategyName === 'momentum-trading') {
+      return 'Momentum Trading';
+    } else {
+      return strategyName.charAt(0).toUpperCase() + strategyName.slice(1);
+    }
+  }, []);
+
+  // Get the current model based on strategy
+  const getCurrentModel = useCallback(() => {
+    // Map strategy to model type
+    // MODEL MAPPING:
+    // - sentiment: uses "sentiment_model.pkl"
+    // - momentum: uses "1_model_meanAveragCrossover.pkl"
+    // - moving_average: uses default model
+    // - macd: uses "macd.pkl"
+    // - transformer: uses "transformer_model.pkl"
+    switch(strategy) {
+      case 'sentiment':
+      case 'sentiment_analysis':
+        return 'sentiment';
+      case 'momentum_trading':
+      case 'momentum':
+        return 'momentum';
+      case 'macd':
+        return 'macd';
+      case 'transformer':
+        return 'transformer';
+      case 'moving_average':
+      default:
+        return 'moving_average';
+    }
+  }, [strategy]);
+
+  // Get model display name
+  const getModelDisplayName = useCallback(() => {
+    const model = getCurrentModel();
+    switch(model) {
+      case 'sentiment':
+        return 'Sentiment Analysis';
+      case 'momentum':
+        return 'Momentum Trading';
+      case 'macd':
+        return 'MACD';
+      case 'moving_average':
+        return 'Moving Average';
+      case 'transformer':
+        return 'Transformer';
+      default:
+        return 'Unknown';
+    }
+  }, [getCurrentModel]);
 
   // Handle settings changes
   const handleSettingsChange = (e) => {
@@ -127,9 +188,16 @@ const TradingInterface = ({ strategy }) => {
     }
   }, [position, tradeSettings.stopLoss, tradeSettings.takeProfit]);
 
-  // Fetch market prediction from the API
-  const fetchMarketPrediction = useCallback(async () => {
-    setIsLoading(true);
+  // Fetch prediction based on current strategy model
+  const fetchPrediction = useCallback(async () => {
+    const currentModel = getCurrentModel();
+    
+    if (currentModel === 'moving_average' || currentModel === 'momentum' || currentModel === 'macd' || currentModel === 'transformer') {
+      setIsLoading(true);
+    } else if (currentModel === 'sentiment') {
+      setIsLoadingSentiment(true);
+    }
+    
     try {
       // First check if data file exists
       const fileCheckResponse = await axios.get("http://localhost:5000/api/check-file", {
@@ -144,49 +212,129 @@ const TradingInterface = ({ strategy }) => {
         });
       }
       
-      // Then fetch prediction
-      const response = await axios.get("http://localhost:5001/api/predict", {
+      // Fetch prediction based on strategy/model
+      let endpoint;
+      switch(currentModel) {
+        case 'sentiment':
+          endpoint = "http://localhost:5001/api/predict-sentiment";
+          break;
+        case 'momentum':
+          endpoint = "http://localhost:5001/api/predict-momentum";
+          break;
+        case 'macd':
+          endpoint = "http://localhost:5001/api/predict-macd";
+          break;
+        case 'transformer':
+          endpoint = "http://localhost:5001/api/predict-transformer";
+          break;
+        case 'moving_average':
+        default:
+          endpoint = "http://localhost:5001/api/predict";
+          break;
+      }
+      
+      const response = await axios.get(endpoint, {
         validateStatus: (status) => status < 500,
       });
       
       const signal = response.data.message;
-      console.log("Received prediction signal:", signal);
-      setMarketPrediction(signal);
+      console.log(`Received ${getModelDisplayName()} prediction signal:`, signal);
+      
+      if (currentModel === 'moving_average' || currentModel === 'momentum' || currentModel === 'macd' || currentModel === 'transformer') {
+        setMarketPrediction(signal);
+        setIsLoading(false);
+      } else if (currentModel === 'sentiment') {
+        setSentimentPrediction(signal);
+        setIsLoadingSentiment(false);
+      }
+      
       setLastSignal(signal);
-      setIsLoading(false);
       return signal;
     } catch (error) {
-      console.error("Error fetching market prediction:", error);
-      setNotification({
-        type: 'error',
-        message: 'Could not fetch market prediction. Check if servers are running.'
-      });
-      setIsLoading(false);
-      
-      // Clear notification after 3 seconds
-      setTimeout(() => setNotification(null), 3000);
+      console.error("Error fetching prediction:", error);
+      if (currentModel === 'moving_average' || currentModel === 'momentum' || currentModel === 'macd' || currentModel === 'transformer') {
+        setIsLoading(false);
+      } else if (currentModel === 'sentiment') {
+        setIsLoadingSentiment(false);
+      }
       return null;
     }
-  }, []);
+  }, [getCurrentModel, getModelDisplayName]);
 
-  // Parse market prediction to determine trading signal
+  // Parse prediction to determine trading signal
   const getTradingSignalFromPrediction = useCallback((prediction) => {
     if (!prediction) return null;
     
-    console.log("Analyzing raw prediction signal:", prediction);
+    const currentModel = getCurrentModel();
+    console.log(`Analyzing ${getModelDisplayName()} prediction signal:`, prediction);
     
-    // Direct exact match for the model output formats
-    if (prediction === "📈 Uptrend (Buy)") {
-      console.log("EXACT MATCH: Buy signal detected");
-      return 'buy';
-    } else if (prediction === "📉 Downtrend (Sell)") {
-      console.log("EXACT MATCH: Sell signal detected");
-      return 'sell';
+    if (currentModel === 'moving_average') {
+      // Direct exact match for the moving average model output
+      if (prediction === "📈 Uptrend (Buy)") {
+        console.log(`EXACT MATCH: Buy signal detected from ${getModelDisplayName()}`);
+        return 'buy';
+      } else if (prediction === "📉 Downtrend (Sell)") {
+        console.log(`EXACT MATCH: Sell signal detected from ${getModelDisplayName()}`);
+        return 'sell';
+      }
+    } else if (currentModel === 'sentiment') {
+      // Direct exact match for sentiment model output
+      if (prediction === "📈 Positive Sentiment (Buy)") {
+        console.log(`EXACT MATCH: Buy signal detected from ${getModelDisplayName()}`);
+        return 'buy';
+      } else if (prediction === "📉 Negative Sentiment (Sell)") {
+        console.log(`EXACT MATCH: Sell signal detected from ${getModelDisplayName()}`);
+        return 'sell';
+      }
+    } else if (currentModel === 'momentum') {
+      // Direct exact match for momentum model output
+      if (prediction === "📈 Strong Momentum (Buy)") {
+        console.log(`EXACT MATCH: Buy signal detected from ${getModelDisplayName()}`);
+        return 'buy';
+      } else if (prediction === "📉 Weak Momentum (Sell)") {
+        console.log(`EXACT MATCH: Sell signal detected from ${getModelDisplayName()}`);
+        return 'sell';
+      }
+    } else if (currentModel === 'macd') {
+      // Direct exact match for MACD model output
+      if (prediction === "📈 MACD Uptrend (Buy)") {
+        console.log(`EXACT MATCH: Buy signal detected from ${getModelDisplayName()}`);
+        return 'buy';
+      } else if (prediction === "📉 MACD Downtrend (Sell)") {
+        console.log(`EXACT MATCH: Sell signal detected from ${getModelDisplayName()}`);
+        return 'sell';
+      } else if (prediction === "↔️ MACD Neutral (Hold)") {
+        console.log(`EXACT MATCH: Hold signal detected from ${getModelDisplayName()}`);
+        return null; // No action for hold
+      }
+    } else if (currentModel === 'transformer') {
+      // Direct exact match for Transformer model output
+      if (prediction === "📈 Transformer Uptrend (Buy)") {
+        console.log(`EXACT MATCH: Buy signal detected from ${getModelDisplayName()}`);
+        return 'buy';
+      } else if (prediction === "📉 Transformer Downtrend (Sell)") {
+        console.log(`EXACT MATCH: Sell signal detected from ${getModelDisplayName()}`);
+        return 'sell';
+      } else if (prediction === "↔️ Transformer Neutral (Hold)") {
+        console.log(`EXACT MATCH: Hold signal detected from ${getModelDisplayName()}`);
+        return null; // No action for hold
+      }
     }
     
-    console.log("No exact signal match detected in prediction");
+    console.log(`No exact signal match detected in ${getModelDisplayName()} prediction`);
     return null;
-  }, []);
+  }, [getCurrentModel, getModelDisplayName]);
+
+  // Get current prediction based on strategy model
+  const getCurrentPrediction = useCallback(() => {
+    const currentModel = getCurrentModel();
+    if (currentModel === 'sentiment') {
+      return sentimentPrediction;
+    } else {
+      // Both moving_average and momentum use the marketPrediction state
+      return marketPrediction;
+    }
+  }, [getCurrentModel, marketPrediction, sentimentPrediction]);
 
   // Open a new position
   const openPosition = async (type) => {
@@ -194,6 +342,8 @@ const TradingInterface = ({ strategy }) => {
       const currentPrice = await getCurrentMarketPrice();
       const quantity = Math.floor(tradeSettings.investment / currentPrice);
       const timestamp = new Date().toLocaleString();
+      const currentModel = getCurrentModel();
+      const modelDisplayName = getModelDisplayName();
       
       setPosition({
         type,
@@ -201,7 +351,10 @@ const TradingInterface = ({ strategy }) => {
         quantity: quantity,
         profit: 0,
         status: 'open',
-        openTime: timestamp
+        openTime: timestamp,
+        model: currentModel,
+        modelDisplay: modelDisplayName,
+        strategy
       });
       
       // Add to trade history
@@ -213,14 +366,17 @@ const TradingInterface = ({ strategy }) => {
           price: currentPrice,
           quantity: quantity,
           timestamp: timestamp,
-          reason: 'Market signal'
+          reason: `${formatStrategyName(strategy)} strategy signal`,
+          model: currentModel,
+          modelDisplay: modelDisplayName,
+          strategy
         },
         ...prev
       ]);
       
       setNotification({
         type: 'info',
-        message: `${type.toUpperCase()} position opened at ${currentPrice.toFixed(2)}`
+        message: `${type.toUpperCase()} position opened at ${currentPrice.toFixed(2)} (${formatStrategyName(strategy)} strategy)`
       });
       
       // Clear notification after 3 seconds
@@ -251,6 +407,8 @@ const TradingInterface = ({ strategy }) => {
       const currentPrice = await getCurrentMarketPrice();
       let profitAmount = profit;
       const timestamp = new Date().toLocaleString();
+      const currentModel = position.model || getCurrentModel();
+      const modelDisplayName = position.modelDisplay || getModelDisplayName();
       
       if (profitAmount === null) {
         if (position.type === 'buy') {
@@ -270,7 +428,10 @@ const TradingInterface = ({ strategy }) => {
           quantity: position.quantity,
           profit: profitAmount,
           timestamp: timestamp,
-          reason: reason
+          reason: reason,
+          model: currentModel,
+          modelDisplay: modelDisplayName,
+          strategy: position.strategy || strategy
         },
         ...prev
       ]);
@@ -286,6 +447,9 @@ const TradingInterface = ({ strategy }) => {
         type: profitAmount >= 0 ? 'success' : 'error',
         message: `Position closed with ${profitAmount >= 0 ? 'profit' : 'loss'}: $${Math.abs(profitAmount).toFixed(2)}`
       });
+      
+      // Update last signal to reflect the close
+      setLastSignal(`${position.type === 'buy' ? 'Sell' : 'Buy'} (${strategy})`);
       
       // Clear notification after 3 seconds
       setTimeout(() => setNotification(null), 3000);
@@ -314,10 +478,12 @@ const TradingInterface = ({ strategy }) => {
     }
   };
 
-  // Auto trading core logic - improved to strictly follow the model signal and ensure continuous trading
+  // Auto trading core logic - using strategy-determined model
   const executeAutoTrade = useCallback(async () => {
     console.log("==== AUTO TRADE EXECUTION ====");
-    console.log("Current raw market prediction:", marketPrediction);
+    console.log(`Current strategy: ${formatStrategyName(strategy)} (using ${getModelDisplayName()} model)`);
+    const currentPrediction = getCurrentPrediction();
+    console.log(`Current prediction from ${getModelDisplayName()} model:`, currentPrediction);
     console.log("Current position status:", position.status);
     
     // If reached max trades, stop auto trading
@@ -333,19 +499,20 @@ const TradingInterface = ({ strategy }) => {
       return;
     }
     
-    // If we don't have a prediction, fetch one
-    if (!marketPrediction) {
-      console.log("No market prediction available, fetching new prediction...");
-      const prediction = await fetchMarketPrediction();
+    // If we don't have a prediction, fetch one for the current strategy model
+    if (!currentPrediction) {
+      console.log(`No ${getModelDisplayName()} prediction available, fetching new prediction...`);
+      const prediction = await fetchPrediction();
+      
       if (!prediction) {
-        console.log("Failed to fetch market prediction");
+        console.log("Failed to fetch prediction");
         return;
       }
     }
     
-    // Get the trading signal directly from the model prediction
-    const signal = getTradingSignalFromPrediction(marketPrediction);
-    console.log("Trading signal from model prediction:", signal);
+    // Get the trading signal from the current strategy model's prediction
+    const signal = getTradingSignalFromPrediction(currentPrediction);
+    console.log(`Trading signal from ${getModelDisplayName()} model:`, signal);
     
     if (!signal) {
       console.log("No valid signal detected in model prediction");
@@ -358,7 +525,7 @@ const TradingInterface = ({ strategy }) => {
       if ((position.type === 'buy' && signal === 'sell') || 
           (position.type === 'sell' && signal === 'buy')) {
         console.log(`SIGNAL CHANGE DETECTED: Closing ${position.type.toUpperCase()} position due to ${signal.toUpperCase()} signal`);
-        await closePosition(null, `Signal changed to ${signal[0].toUpperCase() + signal.slice(1)}`);
+        await closePosition(null, `Signal changed to ${signal[0].toUpperCase() + signal.slice(1)} (${position.modelDisplay || getModelDisplayName()})`);
         
         // After closing, open a new position with new signal immediately
         console.log(`Opening new ${signal.toUpperCase()} position immediately after closing`);
@@ -370,34 +537,49 @@ const TradingInterface = ({ strategy }) => {
       }
     } else {
       // No open position, open a new one based on the signal
-      console.log(`Opening new ${signal.toUpperCase()} position based on model signal`);
+      console.log(`Opening new ${signal.toUpperCase()} position based on ${getModelDisplayName()} model signal`);
       await openPosition(signal);
     }
   }, [
+    strategy,
     position.status,
     position.type,
     tradeCount,
     tradeSettings.maxTrades,
-    marketPrediction,
+    getCurrentPrediction,
     getTradingSignalFromPrediction,
     checkStopLossAndTakeProfit,
     openPosition,
     closePosition,
-    fetchMarketPrediction
+    fetchPrediction,
+    formatStrategyName,
+    getModelDisplayName
   ]);
 
-  // Toggle auto trading on/off with enhanced continuous trading
+  // Toggle auto trading on/off with strategy-based model
   const toggleAutoTrading = () => {
     const newAutoTradingState = !isAutoTrading;
     setIsAutoTrading(newAutoTradingState);
     
     if (newAutoTradingState) {
-      console.log("==== STARTING AUTO TRADING MODE ====");
+      // Force model initialization based on current strategy when auto trading starts
+      const modelDisplayName = getModelDisplayName();
+      const currentModel = getCurrentModel();
+      
+      // Set initial model info in position state even before a position is opened
+      setPosition(prev => ({
+        ...prev,
+        model: currentModel,
+        modelDisplay: modelDisplayName,
+        strategy
+      }));
+      
+      console.log(`==== STARTING AUTO TRADING MODE WITH ${formatStrategyName(strategy).toUpperCase()} STRATEGY (${modelDisplayName.toUpperCase()} MODEL) ====`);
       setTradeCount(0);
       
-      // Refresh market prediction to get latest signal
-      fetchMarketPrediction().then(prediction => {
-        console.log("Fresh market prediction received:", prediction);
+      // Fetch fresh prediction for the current strategy
+      fetchPrediction().then(prediction => {
+        console.log(`Fresh ${modelDisplayName} prediction received:`, prediction);
         
         // Close any open positions before starting auto trading
         if (position.status === 'open') {
@@ -406,7 +588,7 @@ const TradingInterface = ({ strategy }) => {
             // After closing position, immediately check for a new trade opportunity
             const signal = getTradingSignalFromPrediction(prediction);
             if (signal) {
-              console.log("Executing immediate", signal, "signal from model");
+              console.log(`Executing immediate ${signal} signal from ${modelDisplayName} model`);
               openPosition(signal);
             } else {
               console.log("No valid signal detected in model prediction");
@@ -416,7 +598,7 @@ const TradingInterface = ({ strategy }) => {
           // No open position, immediately execute a trade if we have a signal
           const signal = getTradingSignalFromPrediction(prediction);
           if (signal) {
-            console.log("Executing immediate", signal, "signal from model");
+            console.log(`Executing immediate ${signal} signal from ${modelDisplayName} model`);
             openPosition(signal);
           } else {
             console.log("No valid signal detected in model prediction");
@@ -426,7 +608,7 @@ const TradingInterface = ({ strategy }) => {
       
       setNotification({
         type: 'info',
-        message: 'Auto trading started - continuously following model signals'
+        message: `Auto trading started - using ${formatStrategyName(strategy)} strategy`
       });
     } else {
       console.log("==== STOPPING AUTO TRADING MODE ====");
@@ -439,17 +621,17 @@ const TradingInterface = ({ strategy }) => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Handle auto trading with useEffect - improved for continuous trading
+  // Handle auto trading with useEffect - using strategy-based model
   useEffect(() => {
     if (isAutoTrading) {
-      console.log("Auto trading mode is active, setting up continuous monitoring");
+      console.log(`Auto trading mode is active with ${formatStrategyName(strategy)} strategy (${getModelDisplayName()} model), setting up continuous monitoring`);
       
       // Immediately execute auto trade when auto trading is turned on
       executeAutoTrade();
       
       // Set interval to regularly check for trading opportunities and monitor positions
       const interval = setInterval(() => {
-        console.log("Auto trading cycle - Current prediction:", marketPrediction);
+        console.log(`Auto trading cycle - Using ${formatStrategyName(strategy)} strategy (${getModelDisplayName()} model)`);
         
         // Always attempt to execute auto trade based on current signal
         executeAutoTrade();
@@ -470,29 +652,31 @@ const TradingInterface = ({ strategy }) => {
     isAutoTrading, 
     executeAutoTrade,
     autoTradeInterval,
-    marketPrediction
+    strategy,
+    formatStrategyName,
+    getModelDisplayName
   ]);
 
-  // Fetch market prediction more frequently for active trading
+  // Fetch predictions periodically based on strategy
   useEffect(() => {
-    console.log("Setting up prediction monitoring");
+    console.log(`Setting up ${getModelDisplayName()} prediction monitoring for ${formatStrategyName(strategy)} strategy`);
     
-    // Initial fetch
-    fetchMarketPrediction();
+    // Initial fetch for current strategy
+    fetchPrediction();
     
-    // Set up regular refreshes of the market prediction
+    // Set up regular refreshes of the predictions
     const predictionInterval = setInterval(() => {
       if (isAutoTrading) {
-        console.log("Fetching fresh market prediction for auto trading...");
-        fetchMarketPrediction();
+        console.log(`Fetching fresh ${getModelDisplayName()} prediction for ${formatStrategyName(strategy)} auto trading...`);
+        fetchPrediction();
       }
-    }, 15000); // Refresh prediction more frequently (every 15 seconds) when auto trading
+    }, 15000); // Refresh prediction every 15 seconds when auto trading
     
     return () => {
       console.log("Cleaning up prediction interval");
       clearInterval(predictionInterval);
     };
-  }, [fetchMarketPrediction, isAutoTrading]);
+  }, [fetchPrediction, isAutoTrading, strategy, formatStrategyName, getModelDisplayName]);
 
   // Add an effect to explicitly handle market price changes
   useEffect(() => {
@@ -542,45 +726,6 @@ const TradingInterface = ({ strategy }) => {
         {/* Trading Controls */}
         <div>
           <h3 className="text-2xl font-bold text-white mb-6">Trading Controls</h3>
-          
-          {/* Market Prediction */}
-          <div className="mb-6 bg-gray-700 rounded-xl p-4">
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="text-white font-semibold">Market Prediction</h4>
-              <button 
-                onClick={fetchMarketPrediction}
-                disabled={isLoading || isAutoTrading}
-                className="p-2 bg-gray-600 hover:bg-gray-500 disabled:opacity-50 rounded-lg text-white flex items-center"
-              >
-                {isLoading ? 
-                  <RefreshCw className="h-4 w-4 animate-spin" /> : 
-                  <RefreshCw className="h-4 w-4" />
-                }
-              </button>
-            </div>
-            <div className="bg-gray-800 rounded-lg p-4">
-              {marketPrediction ? (
-                <div className={`text-xl font-bold text-center ${
-                  marketPrediction.includes('Buy') || marketPrediction.includes('Uptrend') 
-                    ? 'text-green-400' 
-                    : 'text-red-400'
-                }`}>
-                  {marketPrediction}
-                </div>
-              ) : (
-                <div className="text-gray-400 flex items-center justify-center">
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                      Loading prediction...
-                    </>
-                  ) : (
-                    'No prediction available'
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
           
           {/* Manual Trading Buttons */}
           <div className="flex gap-4 mb-8">
@@ -789,17 +934,30 @@ const TradingInterface = ({ strategy }) => {
                   <span className="text-emerald-400 font-semibold">Active</span>
                 </div>
                 <div className="flex justify-between items-center mt-2">
+                  <span className="text-gray-400">Trading Strategy:</span>
+                  <span className="text-white font-semibold">
+                    {formatStrategyName(strategy)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
                   <span className="text-gray-400">Trades Executed:</span>
                   <span className="text-white font-semibold">{tradeCount} / {tradeSettings.maxTrades}</span>
                 </div>
-                {lastSignal && (
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-gray-400">Last Signal:</span>
-                    <span className={`font-semibold ${lastSignal.includes('Buy') || lastSignal.includes('Uptrend') ? 'text-green-400' : 'text-red-400'}`}>
-                      {lastSignal}
-                    </span>
-                  </div>
-                )}
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-gray-400">Last Signal:</span>
+                  <span className={`font-semibold ${
+                    (getCurrentModel() === 'moving_average' && lastSignal && (lastSignal.includes('Buy') || lastSignal.includes('Uptrend'))) ||
+                    (getCurrentModel() === 'sentiment' && lastSignal && lastSignal.includes('Positive')) ||
+                    (getCurrentModel() === 'momentum' && lastSignal && lastSignal.includes('Strong')) ||
+                    (getCurrentModel() === 'macd' && lastSignal && lastSignal.includes('Uptrend'))
+                      ? 'text-green-400' 
+                      : getCurrentModel() === 'macd' && lastSignal && lastSignal.includes('Neutral')
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
+                  }`}>
+                    {lastSignal || 'None'}
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -833,8 +991,15 @@ const TradingInterface = ({ strategy }) => {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {trade.reason}
+                    <div className="flex justify-between text-xs mt-1">
+                      <span className="text-gray-500">
+                        {trade.reason}
+                      </span>
+                      {trade.strategy && (
+                        <span className="text-emerald-400 font-medium">
+                          {formatStrategyName(trade.strategy)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -878,6 +1043,67 @@ const TradingInterface = ({ strategy }) => {
                 <span className="text-gray-400">Max Drawdown</span>
               </div>
               <span className="text-white font-semibold">12.5%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Market Prediction - Based on Strategy */}
+        <div className="mb-6 bg-gray-700 rounded-xl p-4">
+          <div className="flex flex-col space-y-4">
+            {/* Strategy Information */}
+            <div className="bg-gray-800 rounded-lg p-3 mb-2">
+              <h4 className="text-white font-semibold mb-1">Current Strategy</h4>
+              <div className="flex items-center">
+                <div className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-sm font-medium">
+                  {formatStrategyName(strategy)}
+                </div>
+              </div>
+            </div>
+            
+            {/* Prediction Display - Shows prediction based on strategy */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-white font-semibold">Strategy Prediction</h4>
+                <button 
+                  onClick={fetchPrediction}
+                  disabled={(getCurrentModel() === 'moving_average' || getCurrentModel() === 'momentum' ? isLoading : isLoadingSentiment) || isAutoTrading}
+                  className="p-2 bg-gray-600 hover:bg-gray-500 disabled:opacity-50 rounded-lg text-white flex items-center"
+                >
+                  {(getCurrentModel() === 'moving_average' || getCurrentModel() === 'momentum' ? isLoading : isLoadingSentiment) ? 
+                    <RefreshCw className="h-4 w-4 animate-spin" /> : 
+                    <RefreshCw className="h-4 w-4" />
+                  }
+                </button>
+              </div>
+              
+              <div className="bg-gray-800 rounded-lg p-4">
+                {getCurrentPrediction() ? (
+                  <div className={`text-xl font-bold text-center ${
+                    (getCurrentModel() === 'moving_average' && 
+                     (getCurrentPrediction().includes('Buy') || getCurrentPrediction().includes('Uptrend'))) ||
+                    (getCurrentModel() === 'sentiment' && getCurrentPrediction().includes('Positive')) ||
+                    (getCurrentModel() === 'momentum' && getCurrentPrediction().includes('Strong')) ||
+                    (getCurrentModel() === 'macd' && getCurrentPrediction().includes('Uptrend'))
+                      ? 'text-green-400' 
+                      : getCurrentModel() === 'macd' && getCurrentPrediction().includes('Neutral')
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
+                  }`}>
+                    {getCurrentPrediction()}
+                  </div>
+                ) : (
+                  <div className="text-gray-400 flex items-center justify-center">
+                    {(getCurrentModel() === 'moving_average' || getCurrentModel() === 'momentum' || getCurrentModel() === 'macd' ? isLoading : isLoadingSentiment) ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                        Loading prediction...
+                      </>
+                    ) : (
+                      'No prediction available'
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

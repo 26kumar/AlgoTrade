@@ -20,8 +20,9 @@ const Analytics = React.forwardRef((props, ref) => {
               <Activity className="h-5 w-5 text-emerald-400" />
             </div>
             <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-              <LineChart className="h-12 w-12 text-gray-600" />
-              <span className="text-gray-500 ml-2">Performance Chart</span>
+              <img 
+              className='h-full w-full'
+              src="https://storage.googleapis.com/profit-prod/wp-content/uploads/2022/10/3725171a-performance-management.jpg" alt="" />
             </div>
           </div>
 
@@ -31,8 +32,9 @@ const Analytics = React.forwardRef((props, ref) => {
               <PieChart className="h-5 w-5 text-emerald-400" />
             </div>
             <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-              <BarChart2 className="h-12 w-12 text-gray-600" />
-              <span className="text-gray-500 ml-2">Distribution Chart</span>
+              <img 
+              className='h-full w-full'
+              src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWNiZGgzNHJoeDZrYjkyNHJ3bWNtOTN3eDhmNDhhemN6aXVkd3VudSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7HxmWe4T0iNYojD0OD/giphy.gif" alt="" />
             </div>
           </div>
         </div>

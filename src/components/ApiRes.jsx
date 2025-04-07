@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FileCheck, TrendingUp, AlertCircle, RefreshCw, Activity, BarChart2, Clock, Shield } from "lucide-react";
 import TradingInterface from "./TradingInterface";
 
 const ApiRes = () => {
   const { name } = useParams();
+  const location = useLocation();
   const [message, setMessage] = useState("Checking file status...");
   const [stockPrediction, setStockPrediction] = useState("Loading...");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Extract model from query parameters if available
+  const queryParams = new URLSearchParams(location.search);
+  const modelOverride = queryParams.get('model');
+  
+  // Determine the actual strategy to use based on name and model override
+  const getEffectiveStrategy = () => {
+    if (modelOverride === 'transformer') {
+      return 'transformer';
+    }
+    return name;
+  };
+  
+  const effectiveStrategy = getEffectiveStrategy();
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -26,7 +41,18 @@ const ApiRes = () => {
       });
       setMessage(fileStatus.data.message || "File status checked successfully");
 
-      const prediction = await axios.get("http://127.0.0.1:5001/api/predict", {
+      // Choose the appropriate prediction endpoint based on the strategy
+      let predictionEndpoint = "http://127.0.0.1:5001/api/predict";
+      
+      if (name === 'sentiment-analysis' || name === 'sentiment_analysis') {
+        predictionEndpoint = "http://127.0.0.1:5001/api/predict-sentiment";
+      } else if (name === 'macd') {
+        predictionEndpoint = "http://127.0.0.1:5001/api/predict-macd";
+      } else if (modelOverride === 'transformer' || name === 'time-series-transformer') {
+        predictionEndpoint = "http://127.0.0.1:5001/api/predict-transformer";
+      }
+
+      const prediction = await axios.get(predictionEndpoint, {
         signal: controller.signal,
         validateStatus: (status) => status < 500,
       });
@@ -78,23 +104,36 @@ const ApiRes = () => {
     },
   ];
 
+  // Get display name for the page title
+  const getDisplayName = () => {
+    if (modelOverride === 'transformer') {
+      return "Time Series Transformer";
+    }
+    return name ? name.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") : "System Status";
+  };
+
   return (
     <div className="bg-gray-900 py-20">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-6">
-            {name ? name.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") : "System Status"}
+            {getDisplayName()}
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">Real-time monitoring and trading controls</p>
         </div>
 
-        {name && <TradingInterface strategy={name} />}
+        {effectiveStrategy && <TradingInterface strategy={effectiveStrategy} />}
 
         <h3 className="text-white font-bold text-center">Stock Price with Real-time Buy/Sell Signals</h3>
         <img
           className="w-full max-w-3xl rounded-2xl mx-auto mt-2 mb-10 p-2 shadow-lg border border-gray-300"
-          src="/public/momentum_average_crossover.png"
-          alt="Model Output Image"
+          src={
+            name === 'sentiment-analysis' || name === 'sentiment_analysis' ? "/public/sentiment_analysis.png" : 
+            name === 'macd' ? "/public/macd_analysis.png" : 
+            modelOverride === 'transformer' || name === 'time-series-transformer' ? "/public/transformer_analysis.png" :
+            "/public/momentum_average_crossover.png"
+          }
+          alt={`${getDisplayName()} Model Output`}
         />
 
         <div className="grid md:grid-cols-4 gap-8 mb-16">

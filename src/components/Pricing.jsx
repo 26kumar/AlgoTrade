@@ -5,7 +5,7 @@ const Pricing = React.forwardRef((props, ref) => {
   const plans = [
     {
       name: "Starter",
-      price: "$49",
+      price: "₹799",
       period: "per month",
       description: "Perfect for beginners and small traders",
       features: [
@@ -19,7 +19,7 @@ const Pricing = React.forwardRef((props, ref) => {
     },
     {
       name: "Professional",
-      price: "$199",
+      price: "₹1999",
       period: "per month",
       description: "For serious traders and small firms",
       features: [

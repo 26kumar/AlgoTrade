@@ -7,27 +7,35 @@ const Research = React.forwardRef((props, ref) => {
       title: "Q1 2025 Market Analysis",
       category: "Market Analysis",
       date: "Mar 15, 2025",
-      description: "Comprehensive analysis of global market trends and opportunities"
+      description: "Comprehensive analysis of global market trends and opportunities",
+      driveLink: "https://drive.google.com/file/d/1IgHEng4C3K-eOHYdb9IZZYKTYlxs7cDt/view?usp=sharing"
     },
     {
       title: "Machine Learning in HFT",
       category: "AI Research",
       date: "Mar 10, 2025",
-      description: "Latest developments in ML applications for high-frequency trading"
+      description: "Latest developments in ML applications for high-frequency trading",
+      driveLink: "https://drive.google.com/file/d/1IgHEng4C3K-eOHYdb9IZZYKTYlxs7cDt/view?usp=sharing"
     },
     {
       title: "Crypto Market Dynamics",
       category: "Market Analysis",
       date: "Mar 5, 2025",
-      description: "Deep dive into cryptocurrency market microstructure"
+      description: "Deep dive into cryptocurrency market microstructure",
+      driveLink: "https://drive.google.com/file/d/1IgHEng4C3K-eOHYdb9IZZYKTYlxs7cDt/view?usp=sharing"
     },
     {
       title: "Alternative Data in Trading",
       category: "Quantitative Research",
       date: "Mar 1, 2025",
-      description: "Leveraging alternative data sources for alpha generation"
+      description: "Leveraging alternative data sources for alpha generation",
+      driveLink: "https://drive.google.com/file/d/1IgHEng4C3K-eOHYdb9IZZYKTYlxs7cDt/view?usp=sharing"
     }
   ];
+
+  const handleDownloadClick = (driveLink) => {
+    window.open(driveLink, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section 
@@ -121,7 +129,11 @@ const Research = React.forwardRef((props, ref) => {
                     <span className="text-emerald-400 text-sm">{report.category}</span>
                     <h4 className="text-xl font-semibold text-white mt-1">{report.title}</h4>
                   </div>
-                  <button className="text-emerald-400 hover:text-emerald-300">
+                  <button 
+                    onClick={() => handleDownloadClick(report.driveLink)}
+                    className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                    aria-label={`Download ${report.title}`}
+                  >
                     <Download className="h-5 w-5" />
                   </button>
                 </div>

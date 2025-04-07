@@ -25,14 +25,14 @@ const Contact = React.forwardRef((props, ref) => {
                   <Mail className="h-6 w-6 text-emerald-400 mr-4 mt-1" />
                   <div>
                     <h4 className="text-white font-semibold mb-1">Email</h4>
-                    <p className="text-gray-400">support@algotrade.com</p>
+                    <p className="text-gray-400">algotrade@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Phone className="h-6 w-6 text-emerald-400 mr-4 mt-1" />
                   <div>
                     <h4 className="text-white font-semibold mb-1">Phone</h4>
-                    <p className="text-gray-400">+1 (555) 123-4567</p>
+                    <p className="text-gray-400">+91 9334810701</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -40,15 +40,16 @@ const Contact = React.forwardRef((props, ref) => {
                   <div>
                     <h4 className="text-white font-semibold mb-1">Location</h4>
                     <p className="text-gray-400">
-                      123 Trading Street<br />
-                      New York, NY 10001
+                    Kalinga Institute of Industrial Technology (KIIT)<br/>
+                    Patia, Bhubaneswar, Odisha, India<br/>
+                    Pin: 751024<br />
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <MessageSquare className="h-6 w-6 text-emerald-400 mr-4 mt-1" />
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Live Chat</h4>
+                    <h4 className="text-white font-semibold mb-1">Live Chat (<i>Coming Soon</i>)</h4>
                     <p className="text-gray-400">Available 24/7</p>
                   </div>
                 </div>
