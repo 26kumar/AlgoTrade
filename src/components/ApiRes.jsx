@@ -5,6 +5,8 @@ import { FileCheck, TrendingUp, AlertCircle, RefreshCw, Activity, BarChart2, Clo
 import TradingInterface from "./TradingInterface";
 import Sentiment_image from "../assets/Sentiment_image.jpg"
 import macd_image from "../assets/macd_image.png"
+import momemtum_image from "../assets/momentum_average_crossover.png"
+import transformer_image from "../assets/transformer_analysis.png"
 
 // Update these URLs
 const NODE_SERVER = "https://algotrade-node-server.onrender.com";
@@ -126,8 +128,8 @@ const ApiRes = () => {
           src={
             name === 'sentiment-analysis' || name === 'sentiment_analysis' ? Sentiment_image : 
             name === 'macd' ? macd_image : 
-            modelOverride === 'transformer' || name === 'time-series-transformer' ? "/public/transformer_analysis.png" :
-            "/public/momentum_average_crossover.png"
+            modelOverride === 'transformer' || name === 'time-series-transformer' ? momemtum_image :
+            transformer_image
           }
           alt={`${getDisplayName()} Model Output`}
         />
