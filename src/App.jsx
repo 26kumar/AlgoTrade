@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import About from "./components/About";
@@ -33,29 +33,27 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-900" ref={homeRef}>
-        <Navbar refs={refs} />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Home />
-                <About ref={aboutRef} />
-                <Strategies ref={strategiesRef} />
-                <Research ref={researchRef} />
-                <Products ref={productsRef} />
-                <Analytics ref={analyticsRef} />
-                <Pricing ref={pricingRef} />
-                <Contact ref={contactRef} />
-              </>
-            }
-          />
-          <Route path="/strategy/:name" element={<ApiRes />} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="min-h-screen bg-gray-900" ref={homeRef}>
+      <Navbar refs={refs} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Home />
+              <About ref={aboutRef} />
+              <Strategies ref={strategiesRef} />
+              <Research ref={researchRef} />
+              <Products ref={productsRef} />
+              <Analytics ref={analyticsRef} />
+              <Pricing ref={pricingRef} />
+              <Contact ref={contactRef} />
+            </>
+          }
+        />
+        <Route path="/strategy/:name" element={<ApiRes />} />
+      </Routes>
+    </div>
   );
 }
 

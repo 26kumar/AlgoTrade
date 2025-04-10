@@ -6,6 +6,6 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <HashRouter>
-    <App /> {/* ✅ No need to wrap App with HashRouter here */}
+    <App />
   </HashRouter>
 );
