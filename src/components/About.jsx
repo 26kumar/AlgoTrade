@@ -88,12 +88,12 @@ const About = React.forwardRef((props, ref) => {
 
         {/* Leadership Team Section */}
         <div className="mb-20">
-          <h3 className="text-3xl font-bold text-white mb-12 text-center">
+          {/* <h3 className="text-3xl font-bold text-white mb-12 text-center">
             Our Team
-          </h3>
+          </h3> */}
 
           {/* First row (4 members) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8 px-4">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8 px-4">
             {team.slice(0, 4).map((member, index) => (
               <div
                 key={index}
@@ -111,10 +111,10 @@ const About = React.forwardRef((props, ref) => {
                 <p className="text-gray-400 text-sm">{member.description}</p>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {/* Second row (2 members centered) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4">
             <div className="hidden md:block"></div>
             {team.slice(4, 6).map((member, index) => (
               <div
@@ -134,7 +134,7 @@ const About = React.forwardRef((props, ref) => {
               </div>
             ))}
             <div className="hidden md:block"></div>
-          </div>
+          </div> */}
         </div>
 
         {/* Vision Section */}
